@@ -30,8 +30,7 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     // We also handle the message potentially returning null.
     try {
-      platformVersion =
-          await FlutterCustomCursor.platformVersion ?? 'Unknown platform version';
+      platformVersion = 'Unknown platform version';
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -53,8 +52,11 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body:  const Center(
+          child: MouseRegion(
+            cursor: FlutterCustomCursor(path: 'assets/cursors/pencil.png'),
+            child: Text("Custom Cursor Here..."),
+          ),
         ),
       ),
     );

@@ -41,6 +41,9 @@ void FlutterCustomCursorPlugin::RegisterWithRegistrar(
 
   auto plugin = std::make_unique<FlutterCustomCursorPlugin>();
 
+  std::map<std::string,>
+
+
   channel->SetMethodCallHandler(
       [plugin_pointer = plugin.get()](const auto &call, auto result) {
         plugin_pointer->HandleMethodCall(call, std::move(result));
@@ -56,20 +59,15 @@ FlutterCustomCursorPlugin::~FlutterCustomCursorPlugin() {}
 void FlutterCustomCursorPlugin::HandleMethodCall(
     const flutter::MethodCall<flutter::EncodableValue> &method_call,
     std::unique_ptr<flutter::MethodResult<flutter::EncodableValue>> result) {
-  if (method_call.method_name().compare("getPlatformVersion") == 0) {
-    std::ostringstream version_stream;
-    version_stream << "Windows ";
-    if (IsWindows10OrGreater()) {
-      version_stream << "10+";
-    } else if (IsWindows8OrGreater()) {
-      version_stream << "8";
-    } else if (IsWindows7OrGreater()) {
-      version_stream << "7";
-    }
-    result->Success(flutter::EncodableValue(version_stream.str()));
+  if (method_call.method_name().compare("activateCursor") == 0) {
+    result->Success(flutter::EncodableValue("ok"));
   } else {
     result->NotImplemented();
   }
+}
+
+getCursorFromPath(std::string path) {
+
 }
 
 }  // namespace

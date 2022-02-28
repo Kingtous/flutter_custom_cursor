@@ -1,15 +1,31 @@
 # flutter_custom_cursor
 
-A new flutter plugin project.
+Customize mouse cursor from Image.
+
+## Platforms
+
+[] macOS
+[] Windows
+[] Linux
 
 ## Getting Started
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+```dart
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Plugin example app'),
+        ),
+        body:  const Center(
+          child: MouseRegion(
+            cursor: FlutterCustomCursor(path: 'assets/cursors/pencil.png'),
+            child: Text("Custom Cursor Here..."),
+          ),
+        ),
+      ),
+    );
+  }
+```
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
 
