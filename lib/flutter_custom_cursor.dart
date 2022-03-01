@@ -6,16 +6,19 @@ import 'package:flutter/services.dart';
 
 class FlutterCustomCursor extends MouseCursor  {
   final String path;
+  final double? x;
+  final double? y;
   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
-
   const FlutterCustomCursor({
     required this.path,
+    this.x,
+    this.y
   });
 
   @override
   MouseCursorSession createSession(int device) => _FlutterDesktopCursorSession(this,device);
+
   @override
-  // TODO: implement debugDescription
   String get debugDescription =>  '${objectRuntimeType(this, 'FlutterCustomCursor')}($path)';
 }
 
@@ -33,6 +36,8 @@ class _FlutterDesktopCursorSession extends MouseCursorSession {
       <String, dynamic>{
         'device': device,
         'path': cursor.path,
+        'x' : cursor.x,
+        'y' : cursor.y,
       },
     );
   }

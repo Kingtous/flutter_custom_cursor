@@ -24,12 +24,14 @@ public class FlutterCustomCursorPlugin: NSObject, FlutterPlugin {
     private func activeCursor(_ arguments: Dictionary<String,Any>) {
         let path = arguments["path"] as! String
         let fullPath = Bundle.main.bundlePath + "/Contents/Frameworks/App.framework/Resources/flutter_assets/" + path
-        let cursor = getCursor(named: fullPath)
+        let cursor = getCursor(path:fullPath,
+                               x:arguments["x"] as? Double,
+                               y:arguments["y"] as? Double)
         cursor?.set()
     }
     
     
-    private func getCursor(named path:String) -> NSCursor? {
+    private func getCursor(path:String,x:Double?,y:Double?) -> NSCursor? {
         var cursor = caches[path]
         if(cursor != nil) {
             return cursor!
@@ -38,13 +40,21 @@ public class FlutterCustomCursorPlugin: NSObject, FlutterPlugin {
         if(img == nil) {
             return nil
         }
+        var dx = x;
+        var dy = y;
+        if(dx == nil) {
+            dx = img!.size.width / 2;
+        }
+        if(dy == nil) {
+            dy = img!.size.height / 2;
+        }
+        print(dx,dy)
         cursor = NSCursor.init(image: img!,
-                               hotSpot:NSMakePoint(img!.size.width / 2,img!.size.height / 2))
+                               hotSpot:NSMakePoint(dx!,dy!))
         caches[path] = cursor
         return cursor!
     }
     private func image(named:String) -> NSImage?{
         return NSImage.init(contentsOfFile:"\(named)");
       }
-
 }

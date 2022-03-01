@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import 'package:flutter/services.dart';
-import 'package:flutter_custom_cursor/flutter_custom_cursor.dart';
-
+import 'package:flutter_custom_cursor/mouse_cursors.dart';
 void main() {
   runApp(const MyApp());
 }
@@ -52,11 +50,19 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body:  const Center(
-          child: MouseRegion(
-            cursor: FlutterCustomCursor(path: 'assets/cursors/pencil.png'),
-            child: Text("Custom Cursor Here..."),
-          ),
+        body:   Center(
+          child: ListView(
+            children: const [
+              MouseRegion(
+                cursor: FlutterCustomCursors.pencil,
+                child: Text("Pencil Style, normally apply to edit mode"),
+              ),
+              MouseRegion(
+                cursor: FlutterCustomCursors.erase,
+                child: Text("Erase Style, normally apply to delete mode"),
+              ),
+            ],
+          )
         ),
       ),
     );
