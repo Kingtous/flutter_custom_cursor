@@ -11,7 +11,6 @@ public class FlutterCustomCursorPlugin: NSObject, FlutterPlugin {
   }
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
-    print(call.method)
     switch call.method {
     case "activateCursor":
         activeCursor(call.arguments as! Dictionary<String,Any>)
