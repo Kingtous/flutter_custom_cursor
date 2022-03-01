@@ -48,4 +48,33 @@ Widget build(BuildContext context) {
 }
 ```
 
+# Define you custom cursor
+
+```dart
+@override
+Widget build(BuildContext context) {
+  return MaterialApp(
+    home: Scaffold(
+      appBar: AppBar(
+        title: const Text('Plugin example app'),
+      ),
+      body:   Center(
+          child: ListView(
+            children: const [
+              MouseRegion(
+                cursor: FlutterCustomCursor(path:"assets/cursors/xxx.png"),
+                child: Text("cursor from png"),
+              ),
+            ],
+          )
+      ),
+    ),
+  );
+}
+```
+
+
+
+
+
 
