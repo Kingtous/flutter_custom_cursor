@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_custom_cursor/mouse_cursors.dart';
+
 void main() {
   runApp(const MyApp());
 }
@@ -15,6 +16,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  final path = "/home/kingtous/Downloads/mouse.png";
 
   @override
   void initState() {
@@ -46,41 +48,47 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     var style = const TextStyle(fontSize: 30);
+
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body:   Center(
-          child: ListView(
-            children:  [
-              MouseRegion(
-                cursor: FlutterCustomCursors.pencil,
-                child: Text("Pencil Style, normally apply to edit mode",style:style),
-              ),
-              MouseRegion(
-                cursor: FlutterCustomCursors.erase,
-                child: Text("Erase Style, normally apply to delete mode",style:style),
-              ),
-              MouseRegion(
-                cursor: FlutterCustomCursors.cutTop,
-                child: Text("CutTop Style, normally apply to delete mode",style:style),
-              ),
-              MouseRegion(
-                cursor: FlutterCustomCursors.cutLeft,
-                child: Text("CutLeft Style, normally apply to delete mode",style:style),
-              ),
-              MouseRegion(
-                cursor: FlutterCustomCursors.cutDown,
-                child: Text("CutDown Style, normally apply to delete mode",style:style),
-              ),
-              MouseRegion(
-                cursor: FlutterCustomCursors.cutRight,
-                child: Text("CutRight Style, normally apply to delete mode",style:style),
-              ),
-            ],
-          )
-        ),
+        body: Center(
+            child: ListView(
+          children: [
+            MouseRegion(
+              cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("Pencil Style, normally apply to edit mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("Erase Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("CutTop Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("CutLeft Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("CutDown Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("CutRight Style, normally apply to delete mode",
+                  style: style),
+            ),
+          ],
+        )),
       ),
     );
   }

@@ -38,14 +38,14 @@ GdkWindow* get_gdk_window(FlutterCustomCursorPlugin* self) {
 //   },
 static void activate_cursor(GtkWindow* window, FlValue* args) {
    // TODO
-   //const gchar* cursor_path = fl_value_get_string(fl_value_lookup_string(args, "path"));
+   const gchar* cursor_path = fl_value_get_string(fl_value_lookup_string(args, "path"));
    double x = fl_value_get_float(fl_value_lookup_string(args, "x"));
    double y = fl_value_get_float(fl_value_lookup_string(args, "y"));
    //int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
 
    GdkDisplay* display = gdk_display_get_default();
 
-   GtkImage* image = GTK_IMAGE(gtk_image_new_from_file("/home/kingtous/Downloads/mouse.png"));
+   GtkImage* image = GTK_IMAGE(gtk_image_new_from_file(cursor_path));
    GdkPixbuf* pixbuf = gtk_image_get_pixbuf(image);
    auto cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
