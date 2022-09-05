@@ -31,6 +31,9 @@ flutter:
         pluginClass: FlutterCustomCursorPlugin
       macos:
         pluginClass: FlutterCustomCursorPlugin
+      linux:
+        pluginClass: FlutterCustomCursorPlugin
+
   assets:
     - assets/
     - assets/cursors/
