@@ -1,4 +1,6 @@
+import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -11,7 +13,7 @@ late Uint8List memoryCursorData;
 
 void main() {
   // read memory Cursor
-  final f = File("/home/kingtous/Downloads/mouse.png");
+  final f = File("C:\\Users\\kingtous\\Desktop\\mouse.png");
   memoryCursorData = f.readAsBytesSync();
 
   runApp(const MyApp());
@@ -60,7 +62,9 @@ class _MyAppState extends State<MyApp> {
     var style = const TextStyle(fontSize: 30);
 
     return MaterialApp(
-      home: Scaffold(
+      home: MouseRegion(
+        cursor: DummyCursor(),
+        child: Scaffold(
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
@@ -93,8 +97,8 @@ class _MyAppState extends State<MyApp> {
                   style: style),
             ),
             MouseRegion(
-              cursor: FlutterCustomCursors.getCustomCursor(path),
-              child: Text("CutRight Style, normally apply to delete mode",
+              cursor: SystemMouseCursors.click,
+              child: Text("Flutter Official  Click Cursor",
                   style: style),
             ),
             MouseRegion(
@@ -107,6 +111,7 @@ class _MyAppState extends State<MyApp> {
           ],
         )),
       ),
-    );
+    
+      ));
   }
 }

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -74,6 +75,7 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       FlutterCustomMemoryImageCursor cursor, int device)
       : super(cursor, device);
 
+
   @override
   FlutterCustomMemoryImageCursor get cursor =>
       super.cursor as FlutterCustomMemoryImageCursor;
@@ -95,5 +97,55 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
   }
 
   @override
-  void dispose() {/* Nothing */}
+  void dispose() {
+    if (Platform.isWindows) {
+      debugPrint("activateMemoryImageCursor dispose");
+      DummyCursor._flutterChannel.invokeMapMethod("activateSystemCursor",<String, dynamic>{
+          "kind": "text"
+        });
+        FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
+        'dispose',
+        <String, dynamic>{},
+    );
+    }
+  }
+}
+
+class DummyCursor extends MouseCursor {
+
+  const DummyCursor();
+
+   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
+
+   static const MethodChannel _flutterChannel = MethodChannel('flutter/mousecursor');
+
+  @override
+  MouseCursorSession createSession(int device) =>
+      _DummySession(this, device);
+
+  @override
+  String get debugDescription =>
+      '${objectRuntimeType(this, 'FlutterCustomMemoryImageCursor')}';
+}
+
+class _DummySession extends MouseCursorSession {
+  _DummySession(
+      DummyCursor cursor, int device)
+      : super(cursor, device);
+
+  @override
+  DummyCursor get cursor =>
+      super.cursor as DummyCursor;
+
+  @override
+  Future<void> activate() {
+    return Future.value();
+  }
+
+  @override
+  void dispose() {
+    if (Platform.isWindows) {
+      debugPrint("dummy dispose");
+  }
+  }
 }

@@ -129,11 +129,12 @@ bool Win32Window::CreateAndShow(const std::wstring& title,
   return OnCreate();
 }
 
+#include<iostream>
 // static
 LRESULT CALLBACK Win32Window::WndProc(HWND const window,
                                       UINT const message,
                                       WPARAM const wparam,
-                                      LPARAM const lparam) noexcept {
+                                      LPARAM const lparam) noexcept {     
   if (message == WM_NCCREATE) {
     auto window_struct = reinterpret_cast<CREATESTRUCT*>(lparam);
     SetWindowLongPtr(window, GWLP_USERDATA,
@@ -188,6 +189,8 @@ Win32Window::MessageHandler(HWND hwnd,
         SetFocus(child_content_);
       }
       return 0;
+    default:
+        break;
   }
 
   return DefWindowProc(window_handle_, message, wparam, lparam);
