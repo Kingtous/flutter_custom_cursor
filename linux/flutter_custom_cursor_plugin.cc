@@ -5,6 +5,7 @@
 #include <gdk/gdk.h>
 #include <sys/utsname.h>
 
+#include <iostream>
 #include <cstring>
 
 #define FLUTTER_CUSTOM_CURSOR_PLUGIN(obj) \
@@ -36,32 +37,54 @@ GdkWindow* get_gdk_window(FlutterCustomCursorPlugin* self) {
 //     'x' : cursor.x,
 //     'y' : cursor.y,
 //   },
-static void activate_cursor(GtkWindow* window, FlValue* args) {
-   // TODO
+static void activate_cursor(FlutterCustomCursorPlugin* self, FlValue* args) {
+   GtkWindow* window = get_window(self);
    const gchar* cursor_path = fl_value_get_string(fl_value_lookup_string(args, "path"));
    double x = fl_value_get_float(fl_value_lookup_string(args, "x"));
    double y = fl_value_get_float(fl_value_lookup_string(args, "y"));
    //int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
-
    GdkDisplay* display = gdk_display_get_default();
-
    GtkImage* image = GTK_IMAGE(gtk_image_new_from_file(cursor_path));
    GdkPixbuf* pixbuf = gtk_image_get_pixbuf(image);
    auto cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
-   // TODO
-  //  fl_get_windo
 }
-#include <iostream>
+
+//  <String, dynamic>{
+//     'device': device,
+//     'buffer': cursor.buffer,
+//     'x' : cursor.x,
+//     'y' : cursor.y,
+//     'length':  cursor.buffer.length
+//   },
+static void activate_memory_image_cursor(FlutterCustomCursorPlugin* self, FlValue* args) {
+   GtkWindow* window = get_window(self);
+   const uint8_t* cursor_buff = fl_value_get_uint8_list(fl_value_lookup_string(args, "buffer"));
+   int length = fl_value_get_int(fl_value_lookup_string(args, "length"));
+   double x = fl_value_get_float(fl_value_lookup_string(args, "x"));
+   double y = fl_value_get_float(fl_value_lookup_string(args, "y"));
+   int sx = fl_value_get_int(fl_value_lookup_string(args, "scale_x"));
+   int sy = fl_value_get_int(fl_value_lookup_string(args, "scale_y"));
+  //  int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
+   auto loader = gdk_pixbuf_loader_new();
+   gdk_pixbuf_loader_write(loader, cursor_buff, length, nullptr);
+   if (sx >= 0 && sy >=0) {
+     gdk_pixbuf_loader_set_size(loader, sx, sy);
+   }
+   gdk_pixbuf_loader_close(loader, nullptr);
+   GdkPixbuf* pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+   GdkDisplay* display = gdk_display_get_default();
+   auto cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
+   gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+}
+
 // Called when a method call is received from Flutter.
 static void flutter_custom_cursor_plugin_handle_method_call(
     FlutterCustomCursorPlugin* self,
     FlMethodCall* method_call) {
   g_autoptr(FlMethodResponse) response = nullptr;
-  GtkWindow* window = get_window(self);
-
+  
   const gchar* method = fl_method_call_get_name(method_call);
-  std::cout << "called";
   if (strcmp(method, "getPlatformVersion") == 0) {
     struct utsname uname_data = {};
     uname(&uname_data);
@@ -70,7 +93,11 @@ static void flutter_custom_cursor_plugin_handle_method_call(
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   } else if (strcmp(method, "activateCursor") == 0) {
     auto args = fl_method_call_get_args(method_call);
-    activate_cursor(window, args);
+    activate_cursor(self, args);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  } else if (strcmp(method, "activateMemoryImageCursor") == 0) {
+    auto args = fl_method_call_get_args(method_call);
+    activate_memory_image_cursor(self, args);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
 

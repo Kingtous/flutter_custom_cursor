@@ -1,9 +1,19 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:flutter_custom_cursor/flutter_custom_cursor.dart';
 import 'package:flutter_custom_cursor/mouse_cursors.dart';
+import 'dart:ui' as ui;
+
+late Uint8List memoryCursorData;
 
 void main() {
+  // read memory Cursor
+  final f = File("/home/kingtous/Downloads/mouse.png");
+  memoryCursorData = f.readAsBytesSync();
+
   runApp(const MyApp());
 }
 
@@ -84,6 +94,13 @@ class _MyAppState extends State<MyApp> {
             ),
             MouseRegion(
               cursor: FlutterCustomCursors.getCustomCursor(path),
+              child: Text("CutRight Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomMemoryImageCursor(
+                pixbuf: memoryCursorData,
+              ),
               child: Text("CutRight Style, normally apply to delete mode",
                   style: style),
             ),
