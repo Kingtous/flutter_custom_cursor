@@ -11,10 +11,11 @@ import 'dart:ui' as ui;
 
 late Uint8List memoryCursorData;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // read memory Cursor
-  final f = File("C:\\Users\\kingtous\\Desktop\\mouse.png");
-  memoryCursorData = f.readAsBytesSync();
+  ByteData data = await rootBundle.load("assets/cursors/mouse.png");
+  memoryCursorData = data.buffer.asUint8List();
 
   runApp(const MyApp());
 }
@@ -62,56 +63,51 @@ class _MyAppState extends State<MyApp> {
     var style = const TextStyle(fontSize: 30);
 
     return MaterialApp(
-      home: MouseRegion(
-        cursor: DummyCursor(),
-        child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Plugin example app'),
-        ),
-        body: Center(
-            child: ListView(
-          children: [
-            MouseRegion(
-              cursor: FlutterCustomCursors.getCustomCursor(path),
-              child: Text("Pencil Style, normally apply to edit mode",
-                  style: style),
-            ),
-            MouseRegion(
-              cursor: FlutterCustomCursors.getCustomCursor(path),
-              child: Text("Erase Style, normally apply to delete mode",
-                  style: style),
-            ),
-            MouseRegion(
-              cursor: FlutterCustomCursors.getCustomCursor(path),
-              child: Text("CutTop Style, normally apply to delete mode",
-                  style: style),
-            ),
-            MouseRegion(
-              cursor: FlutterCustomCursors.getCustomCursor(path),
-              child: Text("CutLeft Style, normally apply to delete mode",
-                  style: style),
-            ),
-            MouseRegion(
-              cursor: FlutterCustomCursors.getCustomCursor(path),
-              child: Text("CutDown Style, normally apply to delete mode",
-                  style: style),
-            ),
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: Text("Flutter Official  Click Cursor",
-                  style: style),
-            ),
-            MouseRegion(
-              cursor: FlutterCustomMemoryImageCursor(
-                pixbuf: memoryCursorData,
-              ),
-              child: Text("CutRight Style, normally apply to delete mode",
-                  style: style),
-            ),
-          ],
-        )),
+        home: Scaffold(
+      appBar: AppBar(
+        title: const Text('Plugin example app'),
       ),
-    
-      ));
+      body: Center(
+          child: ListView(
+        children: [
+          MouseRegion(
+            cursor: FlutterCustomCursors.getCustomCursor(path),
+            child:
+                Text("Pencil Style, normally apply to edit mode", style: style),
+          ),
+          MouseRegion(
+            cursor: FlutterCustomCursors.getCustomCursor(path),
+            child: Text("Erase Style, normally apply to delete mode",
+                style: style),
+          ),
+          MouseRegion(
+            cursor: FlutterCustomCursors.getCustomCursor(path),
+            child: Text("CutTop Style, normally apply to delete mode",
+                style: style),
+          ),
+          MouseRegion(
+            cursor: FlutterCustomCursors.getCustomCursor(path),
+            child: Text("CutLeft Style, normally apply to delete mode",
+                style: style),
+          ),
+          MouseRegion(
+            cursor: FlutterCustomCursors.getCustomCursor(path),
+            child: Text("CutDown Style, normally apply to delete mode",
+                style: style),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: Text("Flutter Official  Click Cursor", style: style),
+          ),
+          MouseRegion(
+            cursor: FlutterCustomMemoryImageCursor(
+              pixbuf: memoryCursorData,
+            ),
+            child: Text("CutRight Style, normally apply to delete mode",
+                style: style),
+          ),
+        ],
+      )),
+    ));
   }
 }
