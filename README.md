@@ -73,8 +73,25 @@ Widget build(BuildContext context) {
 }
 ```
 
+# Define your memory image cursor
 
+```dart
+MouseRegion(
+  cursor: FlutterCustomMemoryImageCursor(
+    pixbuf: memoryCursorData, // Uint8List
+  ),
+  child: Text("CutRight Style, normally apply to delete mode",
+      style: style),
+),
+```
 
-
+```dart
+const FlutterCustomMemoryImageCursor(
+      {required this.pixbuf,
+      this.hotx, // hotx, nullable
+      this.hoty, // hoty, nullable
+      this.imageHeight, // used to scale image, nullable 
+      this.imageWidth}); // used to scale image, nullable
+```
 
 
