@@ -41,9 +41,6 @@ void FlutterCustomCursorPlugin::RegisterWithRegistrar(
 
   auto plugin = std::make_unique<FlutterCustomCursorPlugin>();
 
-  std::map<std::string,>
-
-
   channel->SetMethodCallHandler(
       [plugin_pointer = plugin.get()](const auto &call, auto result) {
         plugin_pointer->HandleMethodCall(call, std::move(result));
@@ -64,10 +61,6 @@ void FlutterCustomCursorPlugin::HandleMethodCall(
   } else {
     result->NotImplemented();
   }
-}
-
-getCursorFromPath(std::string path) {
-
 }
 
 }  // namespace
