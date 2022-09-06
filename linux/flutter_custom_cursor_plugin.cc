@@ -45,9 +45,11 @@ static void activate_cursor(FlutterCustomCursorPlugin* self, FlValue* args) {
    //int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
    GdkDisplay* display = gdk_display_get_default();
    GtkImage* image = GTK_IMAGE(gtk_image_new_from_file(cursor_path));
-   GdkPixbuf* pixbuf = gtk_image_get_pixbuf(image);
-   auto cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
+   g_autoptr(GdkPixbuf) pixbuf = gtk_image_get_pixbuf(image);
+   g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+
+   g_object_ref_sink(image);
 }
 
 //  <String, dynamic>{
@@ -66,15 +68,15 @@ static void activate_memory_image_cursor(FlutterCustomCursorPlugin* self, FlValu
    int sx = fl_value_get_int(fl_value_lookup_string(args, "scale_x"));
    int sy = fl_value_get_int(fl_value_lookup_string(args, "scale_y"));
   //  int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
-   auto loader = gdk_pixbuf_loader_new();
+   g_autoptr(GdkPixbufLoader) loader = gdk_pixbuf_loader_new();
    gdk_pixbuf_loader_write(loader, cursor_buff, length, nullptr);
    if (sx >= 0 && sy >=0) {
      gdk_pixbuf_loader_set_size(loader, sx, sy);
    }
    gdk_pixbuf_loader_close(loader, nullptr);
-   GdkPixbuf* pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
+   auto pixbuf = gdk_pixbuf_loader_get_pixbuf(loader);
    GdkDisplay* display = gdk_display_get_default();
-   auto cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
+   g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_pixbuf(display, pixbuf ,x, y);
    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
 }
 
