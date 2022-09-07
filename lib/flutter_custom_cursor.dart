@@ -46,7 +46,8 @@ class _FlutterDesktopCursorSession extends MouseCursorSession {
 }
 
 class FlutterCustomMemoryImageCursor extends MouseCursor {
-  final Uint8List pixbuf;
+  final String? key;
+  final Uint8List? pixbuf;
   final double? hotx;
   final double? hoty;
   // can used to scale image, can be null
@@ -55,11 +56,13 @@ class FlutterCustomMemoryImageCursor extends MouseCursor {
 
   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
   const FlutterCustomMemoryImageCursor(
-      {required this.pixbuf,
+      {this.pixbuf,
+      this.key,
       this.hotx,
       this.hoty,
       this.imageHeight,
-      this.imageWidth});
+      this.imageWidth})
+      : assert((key != null && key != "") || pixbuf != null);
 
   @override
   MouseCursorSession createSession(int device) =>
@@ -67,7 +70,7 @@ class FlutterCustomMemoryImageCursor extends MouseCursor {
 
   @override
   String get debugDescription =>
-      '${objectRuntimeType(this, 'FlutterCustomMemoryImageCursor')}(${pixbuf.length})';
+      '${objectRuntimeType(this, 'FlutterCustomMemoryImageCursor')}(${pixbuf?.length})';
 }
 
 class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
@@ -75,53 +78,61 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       FlutterCustomMemoryImageCursor cursor, int device)
       : super(cursor, device);
 
-
   @override
   FlutterCustomMemoryImageCursor get cursor =>
       super.cursor as FlutterCustomMemoryImageCursor;
 
   @override
-  Future<void> activate() {
-    return FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
+  Future<void> activate() async {
+    Uint8List? buffer = cursor.pixbuf;
+    if (cursor.key != null &&
+        cursor.key!.isNotEmpty &&
+        customCursorController.hasCache(cursor.key!)) {
+      // has cache, ignore buffer
+      buffer = null;
+    }
+    await FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
       'activateMemoryImageCursor',
       <String, dynamic>{
         'device': device,
-        'buffer': cursor.pixbuf,
-        'length': cursor.pixbuf.length,
+        'key': cursor.key ?? "",
+        'buffer': buffer,
+        'length': buffer?.length ?? -1,
         'x': cursor.hotx ?? 0.0,
         'y': cursor.hoty ?? 0.0,
         'scale_x': cursor.imageWidth ?? -1,
         'scale_y': cursor.imageHeight ?? -1
       },
     );
+    if (cursor.key != null && cursor.key!.isNotEmpty) {
+      customCursorController.addCache(cursor.key!);
+    }
   }
 
   @override
   void dispose() {
     if (Platform.isWindows) {
       debugPrint("activateMemoryImageCursor dispose");
-      DummyCursor._flutterChannel.invokeMapMethod("activateSystemCursor",<String, dynamic>{
-          "kind": "text"
-        });
-        FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
+      DummyCursor._flutterChannel.invokeMapMethod(
+          "activateSystemCursor", <String, dynamic>{"kind": "text"});
+      FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
         'dispose',
         <String, dynamic>{},
-    );
+      );
     }
   }
 }
 
 class DummyCursor extends MouseCursor {
-
   const DummyCursor();
 
-   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
+  static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
 
-   static const MethodChannel _flutterChannel = MethodChannel('flutter/mousecursor');
+  static const MethodChannel _flutterChannel =
+      MethodChannel('flutter/mousecursor');
 
   @override
-  MouseCursorSession createSession(int device) =>
-      _DummySession(this, device);
+  MouseCursorSession createSession(int device) => _DummySession(this, device);
 
   @override
   String get debugDescription =>
@@ -129,13 +140,10 @@ class DummyCursor extends MouseCursor {
 }
 
 class _DummySession extends MouseCursorSession {
-  _DummySession(
-      DummyCursor cursor, int device)
-      : super(cursor, device);
+  _DummySession(DummyCursor cursor, int device) : super(cursor, device);
 
   @override
-  DummyCursor get cursor =>
-      super.cursor as DummyCursor;
+  DummyCursor get cursor => super.cursor as DummyCursor;
 
   @override
   Future<void> activate() {
@@ -146,6 +154,40 @@ class _DummySession extends MouseCursorSession {
   void dispose() {
     if (Platform.isWindows) {
       debugPrint("dummy dispose");
-  }
+    }
   }
 }
+
+class FlutterCustomCursorController {
+  FlutterCustomCursorController._();
+
+  static FlutterCustomCursorController instance =
+      FlutterCustomCursorController._();
+
+  static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
+
+  static List<String> cached = List.empty(growable: true);
+
+  Future<void> freeCache(String key) async {
+    await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
+    cached.remove(key);
+  }
+
+  bool hasCache(String? key) {
+    if (key == null) {
+      return false;
+    }
+    return cached.contains(key);
+  }
+
+  void addCache(String? key) {
+    if (key == null) {
+      return;
+    }
+    if (!cached.contains(key)) {
+      cached.add(key);
+    }
+  }
+}
+
+final customCursorController = FlutterCustomCursorController.instance;

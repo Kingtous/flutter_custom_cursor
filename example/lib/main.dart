@@ -99,12 +99,20 @@ class _MyAppState extends State<MyApp> {
             cursor: SystemMouseCursors.click,
             child: Text("Flutter Official  Click Cursor", style: style),
           ),
-          MouseRegion(
-            cursor: FlutterCustomMemoryImageCursor(
-              pixbuf: memoryCursorData,
-            ),
-            child: Text("CutRight Style, normally apply to delete mode",
-                style: style),
+          Row(
+            children: [
+              MouseRegion(
+                cursor: FlutterCustomMemoryImageCursor(
+                    pixbuf: memoryCursorData, key: "12312312"),
+                child: Text("CutRight Style, normally apply to delete mode",
+                    style: style),
+              ),
+              TextButton(
+                  onPressed: () {
+                    customCursorController.freeCache("123");
+                  },
+                  child: Text("clean cache"))
+            ],
           ),
         ],
       )),
