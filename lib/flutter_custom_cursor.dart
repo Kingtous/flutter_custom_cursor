@@ -91,6 +91,10 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       // has cache, ignore buffer
       buffer = null;
     }
+    if (!await customCursorController.needUpdateCursor(cursor.key)) {
+      // no need to update
+      return;
+    }
     await FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
       'activateMemoryImageCursor',
       <String, dynamic>{
@@ -158,6 +162,9 @@ class _DummySession extends MouseCursorSession {
   }
 }
 
+typedef NeedUpdateCursorCallback = Future<bool> Function(
+    String? lastKey, String? currentKey);
+
 class FlutterCustomCursorController {
   FlutterCustomCursorController._();
 
@@ -165,8 +172,8 @@ class FlutterCustomCursorController {
       FlutterCustomCursorController._();
 
   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
-
-  static List<String> cached = List.empty(growable: true);
+  List<String> cached = List.empty(growable: true);
+  List<NeedUpdateCursorCallback> callbacks = [];
 
   Future<void> freeCache(String key) async {
     await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
@@ -187,6 +194,38 @@ class FlutterCustomCursorController {
     if (!cached.contains(key)) {
       cached.add(key);
     }
+  }
+
+  Future<String?> lastCursorKey() {
+    return _channel.invokeMethod("lastCursorKey");
+  }
+
+  Future<List<String>?> getCursorCacheKey() async {
+    final keys = await _channel.invokeMethod<List<Object?>>("getCacheKeyList");
+    return keys?.map((e) => e.toString()).toList(growable: false);
+  }
+
+  void registerNeedUpdateCursorCallback(NeedUpdateCursorCallback callback) {
+    if (callbacks.contains(callback)) {
+      return;
+    }
+    callbacks.add(callback);
+  }
+
+  void remoteNeedUpdateCursorCallback(NeedUpdateCursorCallback callback) {
+    callbacks.remove(callback);
+  }
+
+  /// if one need update cursor, so let's update
+  Future<bool> needUpdateCursor(String? currentKey) async {
+    final lastKey = await lastCursorKey();
+    for (final cb in callbacks) {
+      bool needUpdate = await cb.call(lastKey, currentKey);
+      if (needUpdate) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

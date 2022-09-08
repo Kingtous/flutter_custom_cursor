@@ -30,11 +30,23 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
   final path = "/home/kingtous/Downloads/mouse.png";
+  String msg = "";
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
+    customCursorController.registerNeedUpdateCursorCallback(needUpdate);
+  }
+
+  @override
+  void dispose() {
+    customCursorController.remoteNeedUpdateCursorCallback(needUpdate);
+    super.dispose();
+  }
+
+  Future<bool> needUpdate(String? lastKey, String? currentKey) async {
+    return lastKey != currentKey;
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -103,17 +115,55 @@ class _MyAppState extends State<MyApp> {
             children: [
               MouseRegion(
                 cursor: FlutterCustomMemoryImageCursor(
-                    pixbuf: memoryCursorData, key: "12312312"),
-                child: Text("CutRight Style, normally apply to delete mode",
-                    style: style),
+                    pixbuf: memoryCursorData, key: "123"),
+                child: Text("123 memory cursor", style: style),
               ),
+            ],
+          ),
+          Row(
+            children: [
+              MouseRegion(
+                cursor: FlutterCustomMemoryImageCursor(
+                    pixbuf: memoryCursorData, key: "456"),
+                child: Text("456 memory cursor", style: style),
+              ),
+            ],
+          ),
+          Row(
+            children: [
               TextButton(
                   onPressed: () {
                     customCursorController.freeCache("123");
                   },
-                  child: Text("clean cache"))
+                  child: Text("clean cache [123]")),
+              TextButton(
+                  onPressed: () {
+                    customCursorController.freeCache("456");
+                  },
+                  child: Text("clean cache [456]")),
+              TextButton(
+                  onPressed: () {
+                    customCursorController.getCursorCacheKey().then((keys) {
+                      setState(() {
+                        msg = "caches: ${keys?.toString()}";
+                      });
+                    });
+                  },
+                  child: Text("get cursor cache key")),
+              TextButton(
+                  onPressed: () {
+                    customCursorController.lastCursorKey().then((keys) {
+                      setState(() {
+                        msg = "last cursor key: ${keys?.toString()}";
+                      });
+                    });
+                  },
+                  child: Text("get last cursor key"))
             ],
           ),
+          Row(
+            children: [Text("Response: ${msg}")],
+          )
         ],
       )),
     ));

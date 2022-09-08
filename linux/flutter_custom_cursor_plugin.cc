@@ -21,6 +21,7 @@ struct _FlutterCustomCursorPlugin
   GObject parent_instance;
   FlPluginRegistrar *registrar;
   vector<pair<string, GdkPixbuf*>> cache;
+  string last_cursor_key = "";
 };
 
 G_DEFINE_TYPE(FlutterCustomCursorPlugin, flutter_custom_cursor_plugin, g_object_get_type())
@@ -116,6 +117,11 @@ static void activate_memory_image_cursor(FlutterCustomCursorPlugin *self, FlValu
   cursor = gdk_cursor_new_from_pixbuf(display, pixbuf, x, y);
 
   gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+
+  // add to last cursor key
+  if (!key.empty()) {
+    self->last_cursor_key = key;
+  }
 }
 
 static void free_cache(FlutterCustomCursorPlugin* self, FlValue *args) {
@@ -128,11 +134,27 @@ static void free_cache(FlutterCustomCursorPlugin* self, FlValue *args) {
     it++;
   }
   if (it != self->cache.end()) {
+    if (self->last_cursor_key ==(*it).first) {
+      // clean last cache key
+      self->last_cursor_key.clear();
+    }
+    g_object_unref((*it).second);
     self->cache.erase(it);
+    
     cout << "cache cleaned!" << endl;
   } else {
     cout << "no such cache" << endl;
   }
+}
+
+static FlValue* get_cache_list( FlutterCustomCursorPlugin *self) {
+  auto list = fl_value_new_list();
+
+  for(auto& cache : self->cache) {
+    fl_value_append_take(list, fl_value_new_string(cache.first.c_str()));
+  }
+
+  return list;
 }
 
 // Called when a method call is received from Flutter.
@@ -168,6 +190,17 @@ static void flutter_custom_cursor_plugin_handle_method_call(
     auto args = fl_method_call_get_args(method_call);
     free_cache(self, args);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
+  }
+  else if (strcmp(method, "lastCursorKey") == 0)
+  {
+    g_autofree gchar *last_cursor_key_str = g_strdup_printf("%s", self->last_cursor_key.c_str());
+    auto last_cursor_key = fl_value_new_string(last_cursor_key_str);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(last_cursor_key));
+  }
+  else if (strcmp(method, "getCacheKeyList") == 0)
+  {
+    auto list = get_cache_list(self);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(list));
   }
 
   fl_method_call_respond(method_call, response, nullptr);

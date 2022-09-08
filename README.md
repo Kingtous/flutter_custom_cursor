@@ -87,7 +87,8 @@ MouseRegion(
 
 ```dart
 const FlutterCustomMemoryImageCursor(
-      {required this.pixbuf,
+      {this.pixbuf, // pixbuf
+      this.key, // for cache
       this.hotx, // hotx, nullable
       this.hoty, // hoty, nullable
       this.imageHeight, // used to scale image, nullable 
