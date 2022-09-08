@@ -218,6 +218,10 @@ class FlutterCustomCursorController {
 
   /// if one need update cursor, so let's update
   Future<bool> needUpdateCursor(String? currentKey) async {
+    if (callbacks.isEmpty) {
+      // no registered callback, default is true
+      return true;
+    }
     final lastKey = await lastCursorKey();
     for (final cb in callbacks) {
       bool needUpdate = await cb.call(lastKey, currentKey);
