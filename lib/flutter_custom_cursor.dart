@@ -186,7 +186,11 @@ class FlutterCustomCursorController {
   String _lastCursorKey = "";
 
   Future<void> freeCache(String key) async {
-    await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
+    if (Platform.isWindows) {
+      await SystemChannels.mouseCursor.invokeMethod("freeCache", <String, dynamic>{"key": key});
+    } else {
+      await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
+    }
     cached.remove(key);
   }
 
