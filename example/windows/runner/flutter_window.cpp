@@ -36,11 +36,21 @@ void FlutterWindow::OnDestroy() {
 
   Win32Window::OnDestroy();
 }
-
+#include <iostream>
 LRESULT
 FlutterWindow::MessageHandler(HWND hwnd, UINT const message,
                               WPARAM const wparam,
-                              LPARAM const lparam) noexcept {             
+                              LPARAM const lparam) noexcept {      
+  // unable to get WM_SETCURSOR because it handles this message in engine
+  // switch (message) {
+  //   case WM_SETCURSOR:
+  //       if (LOWORD(lparam) == HTCLIENT)
+  //       {
+  //           std::cout << "cursor set!"<< std::endl << std::flush;
+  //           return TRUE;
+  //       }
+  //       break;
+  // }       
   // Give Flutter, including plugins, an opportunity to handle window messages.
   if (flutter_controller_) {
     std::optional<LRESULT> result =

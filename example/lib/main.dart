@@ -11,11 +11,10 @@ import 'dart:ui' as ui;
 
 late Uint8List memoryCursorData;
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+void main() {
   // read memory Cursor
-  ByteData data = await rootBundle.load("assets/cursors/mouse.png");
-  memoryCursorData = data.buffer.asUint8List();
+  final f = File("C:\\Users\\kingtous\\Desktop\\mouse.png");
+  memoryCursorData = f.readAsBytesSync();
 
   runApp(const MyApp());
 }
@@ -29,24 +28,11 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
-  final path = "/home/kingtous/Downloads/mouse.png";
-  String msg = "";
 
   @override
   void initState() {
     super.initState();
     initPlatformState();
-    customCursorController.registerNeedUpdateCursorCallback(needUpdate);
-  }
-
-  @override
-  void dispose() {
-    customCursorController.remoteNeedUpdateCursorCallback(needUpdate);
-    super.dispose();
-  }
-
-  Future<bool> needUpdate(String? lastKey, String? currentKey) async {
-    return lastKey != currentKey;
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -75,97 +61,58 @@ class _MyAppState extends State<MyApp> {
     var style = const TextStyle(fontSize: 30);
 
     return MaterialApp(
-        home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Plugin example app'),
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('Plugin example app'),
+        ),
+        body: Center(
+            child: ListView(
+          children: [
+            MouseRegion(
+              cursor: FlutterCustomCursors.pencil,
+              child: Text("Pencil Style, normally apply to edit mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.erase,
+              child: Text("Erase Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.cutTop,
+              child: Text("CutTop Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.cutLeft,
+              child: Text("CutLeft Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomCursors.cutDown,
+              child: Text("CutDown Style, normally apply to delete mode",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: Text("Flutter Official  Click Cursor",
+                  style: style),
+            ),
+            MouseRegion(
+              cursor: FlutterCustomMemoryImageCursor(
+                pixbuf: memoryCursorData,
+                imageHeight: 128,
+                imageWidth: 128,
+                hotx: 0,
+                hoty: 0
+              ),
+              child: Text("Memory Image Here",
+                  style: style),
+            ),
+          ],
+        )),
       ),
-      body: Center(
-          child: ListView(
-        children: [
-          MouseRegion(
-            cursor: FlutterCustomCursors.getCustomCursor(path),
-            child:
-                Text("Pencil Style, normally apply to edit mode", style: style),
-          ),
-          MouseRegion(
-            cursor: FlutterCustomCursors.getCustomCursor(path),
-            child: Text("Erase Style, normally apply to delete mode",
-                style: style),
-          ),
-          MouseRegion(
-            cursor: FlutterCustomCursors.getCustomCursor(path),
-            child: Text("CutTop Style, normally apply to delete mode",
-                style: style),
-          ),
-          MouseRegion(
-            cursor: FlutterCustomCursors.getCustomCursor(path),
-            child: Text("CutLeft Style, normally apply to delete mode",
-                style: style),
-          ),
-          MouseRegion(
-            cursor: FlutterCustomCursors.getCustomCursor(path),
-            child: Text("CutDown Style, normally apply to delete mode",
-                style: style),
-          ),
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: Text("Flutter Official  Click Cursor", style: style),
-          ),
-          Row(
-            children: [
-              MouseRegion(
-                cursor: FlutterCustomMemoryImageCursor(
-                    pixbuf: memoryCursorData, key: "123"),
-                child: Text("123 memory cursor", style: style),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              MouseRegion(
-                cursor: FlutterCustomMemoryImageCursor(
-                    pixbuf: memoryCursorData, key: "456"),
-                child: Text("456 memory cursor", style: style),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              TextButton(
-                  onPressed: () {
-                    customCursorController.freeCache("123");
-                  },
-                  child: Text("clean cache [123]")),
-              TextButton(
-                  onPressed: () {
-                    customCursorController.freeCache("456");
-                  },
-                  child: Text("clean cache [456]")),
-              TextButton(
-                  onPressed: () {
-                    customCursorController.getCursorCacheKey().then((keys) {
-                      setState(() {
-                        msg = "caches: ${keys?.toString()}";
-                      });
-                    });
-                  },
-                  child: Text("get cursor cache key")),
-              TextButton(
-                  onPressed: () {
-                    customCursorController.lastCursorKey().then((keys) {
-                      setState(() {
-                        msg = "last cursor key: ${keys?.toString()}";
-                      });
-                    });
-                  },
-                  child: Text("get last cursor key"))
-            ],
-          ),
-          Row(
-            children: [Text("Response: ${msg}")],
-          )
-        ],
-      )),
-    ));
+    
+   );
   }
 }

@@ -53,6 +53,7 @@ class FlutterCustomMemoryImageCursor extends MouseCursor {
   // can used to scale image, can be null
   final int? imageWidth;
   final int? imageHeight;
+  // for windows
 
   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
   const FlutterCustomMemoryImageCursor(
@@ -95,9 +96,10 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       // no need to update
       return;
     }
-    await FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
-      'activateMemoryImageCursor',
-      <String, dynamic>{
+    if (cursor.key != null && cursor.key!.isNotEmpty) {
+      customCursorController.addCache(cursor.key!);
+    }
+    final param = <String, dynamic>{
         'device': device,
         'key': cursor.key ?? "",
         'buffer': buffer,
@@ -106,10 +108,17 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
         'y': cursor.hoty ?? 0.0,
         'scale_x': cursor.imageWidth ?? -1,
         'scale_y': cursor.imageHeight ?? -1
-      },
-    );
-    if (cursor.key != null && cursor.key!.isNotEmpty) {
-      customCursorController.addCache(cursor.key!);
+      };
+    if (Platform.isWindows) {
+      return await SystemChannels.mouseCursor.invokeMethod<void>(
+        'setSystemCursor',
+        param,
+      );
+    } else {
+      return await FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
+        'activateMemoryImageCursor',
+        param,
+      );
     }
   }
 

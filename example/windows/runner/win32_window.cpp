@@ -189,6 +189,13 @@ Win32Window::MessageHandler(HWND hwnd,
         SetFocus(child_content_);
       }
       return 0;
+    case WM_SETCURSOR:
+        if (LOWORD(lparam) == HTCLIENT)
+        {
+            std::cout << "cursor set!"<< std::endl << std::flush;
+            return TRUE;
+        }
+        break;
     default:
         break;
   }
