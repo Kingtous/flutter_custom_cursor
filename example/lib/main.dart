@@ -11,12 +11,23 @@ import 'dart:ui' as ui;
 
 late Uint8List memoryCursorData;
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   // read memory Cursor
-  final f = File("C:\\Users\\kingtous\\Desktop\\mouse.png");
-  memoryCursorData = f.readAsBytesSync();
+  final img = await getImage("C:\\Users\\kingtous\\Desktop\\mouse.png");
+  memoryCursorData = (await img.toByteData())!.buffer.asUint8List();
 
   runApp(const MyApp());
+}
+
+Future<ui.Image> getImage(String path) async {
+  var completer = Completer<ImageInfo>();
+  var img = new FileImage(File(path));
+  img.resolve(const ImageConfiguration()).addListener(ImageStreamListener((info, _) {
+    completer.complete(info);
+  }));
+  ImageInfo imageInfo = await completer.future;
+  return imageInfo.image;
 }
 
 class MyApp extends StatefulWidget {

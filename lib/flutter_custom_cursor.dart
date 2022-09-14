@@ -183,6 +183,7 @@ class FlutterCustomCursorController {
   static const MethodChannel _channel = MethodChannel('flutter_custom_cursor');
   List<String> cached = List.empty(growable: true);
   List<NeedUpdateCursorCallback> callbacks = [];
+  String _lastCursorKey = "";
 
   Future<void> freeCache(String key) async {
     await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
@@ -203,10 +204,15 @@ class FlutterCustomCursorController {
     if (!cached.contains(key)) {
       cached.add(key);
     }
+    _lastCursorKey = key;
   }
 
-  Future<String?> lastCursorKey() {
-    return _channel.invokeMethod("lastCursorKey");
+  Future<String?> lastCursorKey() async {
+    if (Platform.isWindows) {
+      return _lastCursorKey;
+    } else {
+      return _channel.invokeMethod("lastCursorKey");
+    }
   }
 
   Future<List<String>?> getCursorCacheKey() async {
