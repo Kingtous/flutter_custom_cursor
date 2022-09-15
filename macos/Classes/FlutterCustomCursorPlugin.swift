@@ -76,12 +76,11 @@ public class FlutterCustomCursorPlugin: NSObject, FlutterPlugin {
         var dx = x;
         var dy = y;
         if(dx == nil) {
-            dx = image.size.width / 2;
+            dx = Double(image.size.width) / 2;
         }
         if(dy == nil) {
-            dy = image.size.height / 2;
+            dy = Double(image.size.height) / 2;
         }
-        print(dx,dy)
         let cursor = NSCursor.init(image: image,
                                hotSpot:NSMakePoint(dx!,dy!))
         return cursor
