@@ -72,7 +72,6 @@ std::optional<LRESULT> FlutterCustomCursorPlugin::HandleWindowProc(HWND hWnd,
         if (LOWORD(lParam) == HTCLIENT)
         {
             SetCursor(this->current_cursor);
-            std::cout << "cursor set!" << std::endl << std::flush;
             return TRUE;
         }
         break;
@@ -84,14 +83,12 @@ std::optional<LRESULT> FlutterCustomCursorPlugin::HandleWindowProc(HWND hWnd,
 
 FlutterCustomCursorPlugin::FlutterCustomCursorPlugin(flutter::PluginRegistrarWindows* registrar) {
     this->registrar = registrar;
-    std::cout << std::flush;
      this->window_proc_id = registrar->RegisterTopLevelWindowProcDelegate(
          [this](HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
              return this->HandleWindowProc(hWnd, message, wParam, lParam);
          });
     
     this->current_cursor = LoadCursor(NULL, IDC_ARROW);
-    std::cout << std::flush;
 }
 
 FlutterCustomCursorPlugin::~FlutterCustomCursorPlugin() {
@@ -136,12 +133,11 @@ void FlutterCustomCursorPlugin::HandleMethodCall(
   }
   else if (method_call.method_name().compare("activateMemoryImageCursor") == 0) {
       this->activate_memory_image_cursor(method_call.arguments());
-      std::cout << std::flush;
       result->Success();
-  } else if (method_call.method_name().compare("dispose") == 0) {
+  } else if (method_call.method_name().compare("clearCursor") == 0) {
        this->current_cursor = ::LoadCursor(NULL, IDC_ARROW);
         ::SetCursor(this->current_cursor);
-      result->Success();
+      result->Success();1
   }
   else {
     result->NotImplemented();
