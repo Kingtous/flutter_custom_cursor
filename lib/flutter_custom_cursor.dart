@@ -123,14 +123,7 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
   }
 
   @override
-  void dispose() {
-    if (Platform.isWindows) {
-      debugPrint("activateMemoryImageCursor dispose");
-      DummyCursor._flutterChannel.invokeMapMethod(
-          "activateSystemCursor", <String, dynamic>{"kind": "text"});
-      FlutterCustomMemoryImageCursor._channel.invokeMethod('resetCursor');
-    }
-  }
+  void dispose() {}
 }
 
 class DummyCursor extends MouseCursor {
