@@ -88,7 +88,6 @@ static void activate_memory_image_cursor(FlutterCustomCursorPlugin *self, FlValu
     while (it != self->cache.end()) {
       if ((*it).first == key) {
         pixbuf = (*it).second;
-        cout << "cache hit!" << endl;
         break;
       }
       it++;
@@ -96,7 +95,6 @@ static void activate_memory_image_cursor(FlutterCustomCursorPlugin *self, FlValu
   }
   if (pixbuf == nullptr)
   {
-    cout << "not hit!" << endl;
     const uint8_t *cursor_buff = fl_value_get_uint8_list(fl_value_lookup_string(args, "buffer"));
     if (cursor_buff == nullptr) {
       return;
@@ -140,10 +138,7 @@ static void free_cache(FlutterCustomCursorPlugin* self, FlValue *args) {
     }
     g_object_unref((*it).second);
     self->cache.erase(it);
-    
-    cout << "cache cleaned!" << endl;
   } else {
-    cout << "no such cache" << endl;
   }
 }
 
