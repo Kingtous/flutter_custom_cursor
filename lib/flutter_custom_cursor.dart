@@ -100,15 +100,15 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       customCursorController.addCache(cursor.key!);
     }
     final param = <String, dynamic>{
-        'device': device,
-        'key': cursor.key ?? "",
-        'buffer': buffer,
-        'length': buffer?.length ?? -1,
-        'x': cursor.hotx ?? 0.0,
-        'y': cursor.hoty ?? 0.0,
-        'scale_x': cursor.imageWidth ?? -1,
-        'scale_y': cursor.imageHeight ?? -1
-      };
+      'device': device,
+      'key': cursor.key ?? "",
+      'buffer': buffer,
+      'length': buffer?.length ?? -1,
+      'x': cursor.hotx ?? 0.0,
+      'y': cursor.hoty ?? 0.0,
+      'scale_x': cursor.imageWidth ?? -1,
+      'scale_y': cursor.imageHeight ?? -1
+    };
     if (Platform.isWindows) {
       return await SystemChannels.mouseCursor.invokeMethod<void>(
         'setSystemCursor',
@@ -128,10 +128,7 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       debugPrint("activateMemoryImageCursor dispose");
       DummyCursor._flutterChannel.invokeMapMethod(
           "activateSystemCursor", <String, dynamic>{"kind": "text"});
-      FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
-        'clearCursor',
-        <String, dynamic>{},
-      );
+      FlutterCustomMemoryImageCursor._channel.invokeMethod('resetCursor');
     }
   }
 }
@@ -187,7 +184,8 @@ class FlutterCustomCursorController {
 
   Future<void> freeCache(String key) async {
     if (Platform.isWindows) {
-      await SystemChannels.mouseCursor.invokeMethod("freeCache", <String, dynamic>{"key": key});
+      await SystemChannels.mouseCursor
+          .invokeMethod("freeCache", <String, dynamic>{"key": key});
     } else {
       await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
     }
