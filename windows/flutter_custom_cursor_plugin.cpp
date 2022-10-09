@@ -137,7 +137,7 @@ void FlutterCustomCursorPlugin::HandleMethodCall(
   } else if (method_call.method_name().compare("clearCursor") == 0) {
        this->current_cursor = ::LoadCursor(NULL, IDC_ARROW);
         ::SetCursor(this->current_cursor);
-      result->Success();1
+      result->Success();
   }
   else {
     result->NotImplemented();

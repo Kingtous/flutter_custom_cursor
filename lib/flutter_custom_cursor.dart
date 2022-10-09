@@ -129,7 +129,7 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       DummyCursor._flutterChannel.invokeMapMethod(
           "activateSystemCursor", <String, dynamic>{"kind": "text"});
       FlutterCustomMemoryImageCursor._channel.invokeMethod<void>(
-        'dispose',
+        'clearCursor',
         <String, dynamic>{},
       );
     }
