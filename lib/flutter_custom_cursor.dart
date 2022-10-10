@@ -86,18 +86,20 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
   @override
   Future<void> activate() async {
     Uint8List? buffer = cursor.pixbuf;
-    if (cursor.key != null &&
+    if (!Platform.isWindows) {
+      if (cursor.key != null &&
         cursor.key!.isNotEmpty &&
         customCursorController.hasCache(cursor.key!)) {
-      // has cache, ignore buffer
-      buffer = null;
-    }
-    if (!await customCursorController.needUpdateCursor(cursor.key)) {
-      // no need to update
-      return;
-    }
-    if (cursor.key != null && cursor.key!.isNotEmpty) {
-      customCursorController.addCache(cursor.key!);
+        // has cache, ignore buffer
+        buffer = null;
+      }
+      if (!await customCursorController.needUpdateCursor(cursor.key)) {
+        // no need to update
+        return;
+      }
+      if (cursor.key != null && cursor.key!.isNotEmpty) {
+        customCursorController.addCache(cursor.key!);
+      }
     }
     final param = <String, dynamic>{
       'device': device,

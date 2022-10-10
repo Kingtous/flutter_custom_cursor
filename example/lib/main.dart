@@ -10,12 +10,16 @@ import 'package:flutter_custom_cursor/mouse_cursors.dart';
 import 'dart:ui' as ui;
 
 late Uint8List memoryCursorData;
+late int width;
+late int height;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // read memory Cursor
-  final img = await getImage("C:\\Users\\kingtous\\Desktop\\mouse.png");
-  memoryCursorData = (await img.toByteData())!.buffer.asUint8List();
+  final img = await getImage("C:\\Users\\kingtous\\Desktop\\test-32.png");
+  width = img.width;
+  height = img.height;
+  memoryCursorData = (await img.toByteData(format: ui.ImageByteFormat.rawRgba))!.buffer.asUint8List();
 
   runApp(const MyApp());
 }
@@ -39,6 +43,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  String msg = "";
 
   @override
   void initState() {
@@ -112,14 +117,16 @@ class _MyAppState extends State<MyApp> {
             MouseRegion(
               cursor: FlutterCustomMemoryImageCursor(
                 pixbuf: memoryCursorData,
-                imageHeight: 128,
-                imageWidth: 128,
-                hotx: 0,
-                hoty: 0
+                imageHeight: height,
+                imageWidth: width,
+                hotx: 4,
+                hoty: 4
               ),
               child: Text("Memory Image Here",
                   style: style),
             ),
+
+            Text("$msg"),
           ],
         )),
       ),
