@@ -117,10 +117,10 @@ class _MyAppState extends State<MyApp> {
             MouseRegion(
               cursor: FlutterCustomMemoryImageCursor(
                 pixbuf: memoryCursorData,
-                imageHeight: height,
-                imageWidth: width,
-                hotx: 4,
-                hoty: 4
+                imageHeight: 24,
+                imageWidth: 24,
+                hotx: 0,
+                hoty: 0
               ),
               child: Text("Memory Image Here",
                   style: style),
