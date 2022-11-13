@@ -9,17 +9,21 @@ import 'package:flutter_custom_cursor/flutter_custom_cursor.dart';
 import 'package:flutter_custom_cursor/mouse_cursors.dart';
 import 'dart:ui' as ui;
 
-late Uint8List memoryCursorData;
+late Uint8List memoryCursorDataRawRGBA;
+late Uint8List memoryCursorDataRawPNG;
 late int width;
 late int height;
 
+String imgPath = "C:\\projects\\rustdesk_flutter_custom_cursor\\example\\assets\\cursors\\circle.png";
+late ui.Image img;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   // read memory Cursor
-  final img = await getImage("C:\\Users\\kingtous\\Desktop\\test-32.png");
+  img = await getImage(imgPath);
   width = img.width;
   height = img.height;
-  memoryCursorData = (await img.toByteData(format: ui.ImageByteFormat.rawRgba))!.buffer.asUint8List();
+  memoryCursorDataRawRGBA = (await img.toByteData(format: ui.ImageByteFormat.rawRgba))!.buffer.asUint8List();
+  memoryCursorDataRawPNG = (await img.toByteData(format: ui.ImageByteFormat.png))!.buffer.asUint8List();
 
   runApp(const MyApp());
 }
@@ -75,7 +79,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     var style = const TextStyle(fontSize: 30);
-
+    print("rebuild");
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -116,17 +120,44 @@ class _MyAppState extends State<MyApp> {
             ),
             MouseRegion(
               cursor: FlutterCustomMemoryImageCursor(
-                pixbuf: memoryCursorData,
-                imageHeight: 24,
-                imageWidth: 24,
+                key: "key",
+                pixbuf: memoryCursorDataRawRGBA,
+                imageHeight: 32,
+                imageWidth: 32,
                 hotx: 0,
                 hoty: 0
               ),
-              child: Text("Memory Image Here",
+              child: Row(
+                children: [
+                  Image.memory(memoryCursorDataRawPNG),
+                  Text("Memory Image Here",
                   style: style),
+                ],
+              ),
             ),
-
-            Text("$msg"),
+            Text("OUTPUT: ${msg}"),
+            TextButton(onPressed: () async {
+              msg = "${await FlutterCustomCursorController.instance.getCursorCacheKey()}";
+              setState(()  {
+                
+              }); 
+            }, child: Text("Last Cursor Cache List")),
+            TextButton(onPressed: () async {
+              final keys = await FlutterCustomCursorController.instance.getCursorCacheKey() ?? [];
+              for (final key in keys) {
+                await FlutterCustomCursorController.instance.freeCache(key);
+              }
+              msg = "${await FlutterCustomCursorController.instance.getCursorCacheKey()}";
+              setState(()  {
+                
+              }); 
+            }, child: Text("free all cache")),
+            TextButton(onPressed: () async {
+              msg = "${await FlutterCustomCursorController.instance.lastCursorKey()}";
+              setState(() {
+                
+              }); 
+            }, child: Text("Last Cursor Key"))
           ],
         )),
       ),

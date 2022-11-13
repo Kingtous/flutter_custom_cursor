@@ -86,20 +86,24 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
   @override
   Future<void> activate() async {
     Uint8List? buffer = cursor.pixbuf;
-    if (!Platform.isWindows) {
-      if (cursor.key != null &&
+    if (cursor.key != null &&
         cursor.key!.isNotEmpty &&
         customCursorController.hasCache(cursor.key!)) {
         // has cache, ignore buffer
-        buffer = null;
+        debugPrint("has cache, ignore buffer");
+        buffer = Platform.isWindows ? Uint8List(0) : null;
       }
       if (!await customCursorController.needUpdateCursor(cursor.key)) {
         // no need to update
+         debugPrint("no need to update");
         return;
       }
       if (cursor.key != null && cursor.key!.isNotEmpty) {
         customCursorController.addCache(cursor.key!);
-      }
+    }
+    if (Platform.isWindows && cursor.key != null && await FlutterCustomCursorController.instance.lastCursorKey() == cursor.key) {
+      debugPrint("no need to update");
+      return;
     }
     final param = <String, dynamic>{
       'device': device,
@@ -112,6 +116,7 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       'scale_y': cursor.imageHeight ?? -1
     };
     if (Platform.isWindows) {
+      print("set cursor");
       return await SystemChannels.mouseCursor.invokeMethod<void>(
         'setSystemCursor',
         param,
@@ -206,15 +211,20 @@ class FlutterCustomCursorController {
 
   Future<String?> lastCursorKey() async {
     if (Platform.isWindows) {
-      return _lastCursorKey;
+      return SystemChannels.mouseCursor.invokeMethod("lastCursorKey");
     } else {
       return _channel.invokeMethod("lastCursorKey");
     }
   }
 
   Future<List<String>?> getCursorCacheKey() async {
-    final keys = await _channel.invokeMethod<List<Object?>>("getCacheKeyList");
-    return keys?.map((e) => e.toString()).toList(growable: false);
+    if (Platform.isWindows) {
+      final keys = await SystemChannels.mouseCursor.invokeMethod<List<Object?>>("getCacheKeyList");
+      return keys?.map((e) => e.toString()).toList(growable: false);
+    } else {
+      final keys = await _channel.invokeMethod<List<Object?>>("getCacheKeyList");
+      return keys?.map((e) => e.toString()).toList(growable: false);
+    }
   }
 
   void registerNeedUpdateCursorCallback(NeedUpdateCursorCallback callback) {
