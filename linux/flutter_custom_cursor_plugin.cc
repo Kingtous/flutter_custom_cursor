@@ -108,7 +108,7 @@ static void activate_memory_image_cursor(FlutterCustomCursorPlugin *self, FlValu
     }
     gdk_pixbuf_loader_close(loader, nullptr);
     pixbuf = gdk_pixbuf_copy(gdk_pixbuf_loader_get_pixbuf(loader));
-    self->cache.emplace_back(pair<string, GdkPixbuf *>(move(key), pixbuf));
+    self->cache.emplace_back(pair<string, GdkPixbuf *>(key, pixbuf));
   }
   GdkDisplay *display = gdk_display_get_default();
   g_autoptr(GdkCursor) cursor;
@@ -118,7 +118,7 @@ static void activate_memory_image_cursor(FlutterCustomCursorPlugin *self, FlValu
 
   // add to last cursor key
   if (!key.empty()) {
-    self->last_cursor_key = key;
+    self->last_cursor_key = move(key);
   }
 }
 
