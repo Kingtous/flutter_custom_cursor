@@ -186,8 +186,10 @@ class FlutterCustomCursorController {
     if (Platform.isWindows) {
       await SystemChannels.mouseCursor
           .invokeMethod("freeCache", <String, dynamic>{"key": key});
-    } else {
+    } else if (Platform.isLinux) {
       await _channel.invokeMethod("freeCache", <String, dynamic>{"key": key});
+    } else {
+      // todo: macos
     }
     cached.remove(key);
   }
