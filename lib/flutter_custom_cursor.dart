@@ -90,19 +90,19 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
         cursor.key!.isNotEmpty &&
         customCursorController.hasCache(cursor.key!)) {
         // has cache, ignore buffer
-        debugPrint("has cache, ignore buffer");
+        // debugPrint("has cache, ignore buffer");
         buffer = Platform.isWindows ? Uint8List(0) : null;
       }
       if (!await customCursorController.needUpdateCursor(cursor.key)) {
         // no need to update
-         debugPrint("no need to update");
+        //  debugPrint("no need to update");
         return;
       }
       if (cursor.key != null && cursor.key!.isNotEmpty) {
         customCursorController.addCache(cursor.key!);
     }
     if (Platform.isWindows && cursor.key != null && await FlutterCustomCursorController.instance.lastCursorKey() == cursor.key) {
-      debugPrint("no need to update");
+      // debugPrint("no need to update");
       return;
     }
     final param = <String, dynamic>{
@@ -116,7 +116,7 @@ class _FlutterCustomMemoryImageCursorSession extends MouseCursorSession {
       'scale_y': cursor.imageHeight ?? -1
     };
     if (Platform.isWindows) {
-      print("set cursor");
+      // print("set cursor");
       return await SystemChannels.mouseCursor.invokeMethod<void>(
         'setSystemCursor',
         param,
@@ -163,7 +163,7 @@ class _DummySession extends MouseCursorSession {
   @override
   void dispose() {
     if (Platform.isWindows) {
-      debugPrint("dummy dispose");
+      // debugPrint("dummy dispose");
     }
   }
 }
