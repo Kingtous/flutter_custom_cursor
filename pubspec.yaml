@@ -1,5 +1,5 @@
 name: flutter_custom_cursor
-description: A new flutter plugin project.
+description: Create/Set a custom mouse cursor directly from a memory buffer.
 version: 0.0.1
 homepage: https://github.com/Kingtous/flutter_custom_cursor
 
