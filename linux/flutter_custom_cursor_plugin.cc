@@ -118,6 +118,8 @@ static bool set_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
 static bool delete_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
   auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
   if (self->cache->find(name) != self->cache->end()) {
+    auto cursor = self->cache->at(name);
+    g_object_unref(cursor);
     self->cache->erase(name);
     return true;
   }
