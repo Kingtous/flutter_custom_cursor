@@ -10,6 +10,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <memory>
 
 using namespace std;
 
@@ -21,7 +22,7 @@ struct _FlutterCustomCursorPlugin
 {
   GObject parent_instance;
   FlPluginRegistrar *registrar;
-  unordered_map<string, GdkPixbuf*> cache;
+  unique_ptr<unordered_map<string, GdkCursor*>> cache;
 };
 
 G_DEFINE_TYPE(FlutterCustomCursorPlugin, flutter_custom_cursor_plugin, g_object_get_type())
@@ -73,15 +74,14 @@ GdkWindow *get_gdk_window(FlutterCustomCursorPlugin *self)
 static string create_custom_cursor(FlutterCustomCursorPlugin *self, FlValue *args)
 {
   auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
-  int length = fl_value_get_int(fl_value_lookup_string(args, "length"));
   double hot_x = fl_value_get_float(fl_value_lookup_string(args, "hotX"));
   double hot_y = fl_value_get_float(fl_value_lookup_string(args, "hotY"));
   int width = fl_value_get_int(fl_value_lookup_string(args, "width"));
   int height = fl_value_get_int(fl_value_lookup_string(args, "height"));
-  GtkWindow *window = get_window(self);
   GdkPixbuf* pixbuf = nullptr;
-
-  const uint8_t *cursor_buff = fl_value_get_uint8_list(fl_value_lookup_string(args, "buffer"));
+  auto buffer = fl_value_lookup_string(args, "buffer");
+  const uint8_t *cursor_buff = fl_value_get_uint8_list(buffer);
+  auto length = fl_value_get_length(buffer);
   if (cursor_buff == nullptr) {
     return nullptr;
   }
@@ -95,20 +95,20 @@ static string create_custom_cursor(FlutterCustomCursorPlugin *self, FlValue *arg
   gdk_pixbuf_loader_close(loader, nullptr);
   pixbuf = gdk_pixbuf_copy(gdk_pixbuf_loader_get_pixbuf(loader));
   GdkDisplay *display = gdk_display_get_default();
-  g_autoptr(GdkCursor) cursor;
+  GdkCursor* cursor = nullptr;
   cursor = gdk_cursor_new_from_pixbuf(display, pixbuf, hot_x, hot_y);
   if (cursor == nullptr) {
     return nullptr;
   }
-  self->cache[name] = cursor;
+  self->cache->insert(std::make_pair(name, cursor));
   return name;
 }
 
 static bool set_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
   auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
-  if (self->cache.find(name) != self->cache.end()) {
+  if (self->cache->find(name) != self->cache->end()) {
     GtkWindow *window = get_window(self);
-    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), self->cache->at(name));
     return true;
   } else {
     return false;
@@ -117,9 +117,8 @@ static bool set_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
 
 static bool delete_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
   auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
-  if (self->cache.find(name) != self->cache.end()) {
-    GtkWindow *window = get_window(self);
-    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+  if (self->cache->find(name) != self->cache->end()) {
+    self->cache->erase(name);
     return true;
   }
   return false;
@@ -145,18 +144,18 @@ static void flutter_custom_cursor_plugin_handle_method_call(
   {
     auto args = fl_method_call_get_args(method_call);
     auto ret = create_custom_cursor(self, args);
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(ret));
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(fl_value_new_string(ret.c_str())));
   }
   else if (strcmp(method, "setCustomCursor") == 0)
   {
     auto args = fl_method_call_get_args(method_call); 
-    auto _ret = set_custom_cursor(self, args);
+    set_custom_cursor(self, args);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
   else if (strcmp(method, "deleteCustomCursor") == 0)
   {
     auto args = fl_method_call_get_args(method_call);
-    auto _ret = delete_custom_cursor(self, args);
+    delete_custom_cursor(self, args);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
   fl_method_call_respond(method_call, response, nullptr);
@@ -172,7 +171,9 @@ static void flutter_custom_cursor_plugin_class_init(FlutterCustomCursorPluginCla
   G_OBJECT_CLASS(klass)->dispose = flutter_custom_cursor_plugin_dispose;
 }
 
-static void flutter_custom_cursor_plugin_init(FlutterCustomCursorPlugin *self) {}
+static void flutter_custom_cursor_plugin_init(FlutterCustomCursorPlugin *self) {
+  self->cache = make_unique<unordered_map<string, GdkCursor*>>();
+}
 
 static void method_call_cb(FlMethodChannel *channel, FlMethodCall *method_call,
                            gpointer user_data)
