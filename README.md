@@ -1,15 +1,16 @@
 # flutter_custom_cursor
 
-Create/Set a custom mouse cursor from memory buffer.
+This plugin allows to create/set a custom mouse cursor directly from a memory buffer.
+
+Big thanks to imiskolee to create the [base of this plugin](https://github.com/imiskolee/flutter_custom_cursor).
 
 ## Platforms
 
-[x] macOS
-[x] Windows
-[x] Linux
+- [x] macOS
+- [x] Windows
+- [x] Linux
 
 Note: Currently, the api required by this plugin on Windows is included in flutter `master` branch. It means that u need to use this plugin with flutter master branch on Windows platform. See [flutter engine PR#36143](https://github.com/flutter/engine/pull/36143) for details.
-
 
 # Get prepared
 

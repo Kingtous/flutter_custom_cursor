@@ -1,7 +1,7 @@
 name: flutter_custom_cursor
 description: A new flutter plugin project.
 version: 0.0.1
-homepage:
+homepage: https://github.com/Kingtous/flutter_custom_cursor
 
 environment:
   sdk: ">=2.13.0 <3.0.0"
