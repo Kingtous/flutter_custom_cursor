@@ -1,98 +1,57 @@
 # flutter_custom_cursor
 
-Customize mouse cursor from Image.
+Create/Set a custom mouse cursor from memory buffer.
 
 ## Platforms
 
-[] macOS
-[] Windows
-[] Linux
+[x] macOS
+[x] Windows
+[x] Linux
 
-## Getting Started
+Note: Currently, the api required by this plugin on Windows is included in flutter `master` branch. It means that u need to use this plugin with flutter master branch on Windows platform. See [flutter engine PR#36143](https://github.com/flutter/engine/pull/36143) for details.
 
-## Using embeded additional mouse cursors
-We're already defined some mmouse cursors on class `FlutterCustomCursors`,just like the stardand class
-`SystemMouseCursors`.
 
-### Embed cursors list
+# Get prepared
 
-* `FlutterCustomCursors.pencil`.
-* `FlutterCustomCursors.erase`.
-* `FlutterCustomCursors.cut`(TODO)
-* `FlutterCustomCursors.merge`(TODO)
+## Register your custom cursor before
 
 ```dart
-  @override
-Widget build(BuildContext context) {
-  return MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Plugin example app'),
-      ),
-      body:   Center(
-          child: ListView(
-            children: const [
-              MouseRegion(
-                cursor: FlutterCustomCursors.pencil,
-                child: Text("Pencil Style, normally apply to edit mode"),
-              ),
-              MouseRegion(
-                cursor: FlutterCustomCursors.erase,
-                child: Text("Erase Style, normally apply to delete mode"),
-              ),
-            ],
-          )
-      ),
-    ),
-  );
-}
+// register this cursor
+cursorName = await CursorManager.instance.registerCursor(CursorData()
+  ..name = "test"
+  ..buffer =
+      Platform.isWindows ? memoryCursorDataRawBGRA : memoryCursorDataRawPNG
+  ..height = img.height
+  ..width = img.width
+  ..hotX = 0
+  ..hotY = 0);
 ```
 
-# Define you custom cursor
+Note that a String `cacheName` will be returned by the function `registerCursor`, which can be used to set this cursor to system or delete this cursor.
 
-```dart
-@override
-Widget build(BuildContext context) {
-  return MaterialApp(
-    home: Scaffold(
-      appBar: AppBar(
-        title: const Text('Plugin example app'),
-      ),
-      body:   Center(
-          child: ListView(
-            children: const [
-              MouseRegion(
-                cursor: FlutterCustomCursor(path:"assets/cursors/xxx.png"),
-                child: Text("cursor from png"),
-              ),
-            ],
-          )
-      ),
-    ),
-  );
-}
-```
+`CursorData.buffer` is a `Uint8List` which contains the cursor data. Be aware that on Windows, `buffer` is formatted by `rawBGRA`, other OS(s) are `rawPNG`.
 
-# Define your memory image cursor
+see the example project for details.
+
+## Set the custom cursor
+
+We have implemented the `FlutterCustomMemoryImageCursor` class, which is a subclass of `MouseCursor`. This class will automatically set the memory cursor for you. Keep it simple.
 
 ```dart
 MouseRegion(
-  cursor: FlutterCustomMemoryImageCursor(
-    pixbuf: memoryCursorData, // Uint8List
+  cursor: FlutterCustomMemoryImageCursor(key: cursorName),
+  child: Row(
+    children: [
+      Text("Memory image here", style: style),
+    ],
   ),
-  child: Text("CutRight Style, normally apply to delete mode",
-      style: style),
 ),
 ```
 
+## Delete the cursor 
+
+You can delete a cursor with the `cursorName`.
+
 ```dart
-const FlutterCustomMemoryImageCursor(
-      {this.pixbuf, // pixbuf
-      this.key, // for cache
-      this.hotx, // hotx, nullable
-      this.hoty, // hoty, nullable
-      this.imageHeight, // used to scale image, nullable 
-      this.imageWidth}); // used to scale image, nullable
+await CursorManager.instance.deleteCursor("cursorName");
 ```
-
-

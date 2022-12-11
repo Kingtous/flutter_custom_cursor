@@ -2,7 +2,7 @@ import Cocoa
 import FlutterMacOS
 
 public class FlutterCustomCursorPlugin: NSObject, FlutterPlugin {
-    private var caches:Dictionary = [String:NSCursor]();
+  private var caches: Dictionary = [String: NSCursor]();
     
   public static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(name: "flutter_custom_cursor", binaryMessenger: registrar.messenger)
@@ -12,15 +12,69 @@ public class FlutterCustomCursorPlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
     switch call.method {
-    case "activateCursor":
-        activeCursor(call.arguments as! Dictionary<String,Any>)
-        result("ok")
-    case "activateMemoryImageCursor":
-        activateMemoryImageCursor(call.arguments as! Dictionary<String, Any>)
-        result("ok")
+    case "createCustomCursor":
+        let arguments = call.arguments as! Dictionary<String, Any>
+        let ret = createCustomCursor(arguments)
+        if (ret == nil) {
+            result(FlutterError(code: "-1", message: "Create the cursor failed", details: "Please make sure a png buffer is provided."))
+        } else {
+            result(ret!)
+        }
+        break
+    case "setCustomCursor":
+        let arguments = call.arguments as! Dictionary<String, Any>
+        let ret = setCustomCursor(arguments)
+        if ret {
+            result(nil)
+        } else {
+            result(FlutterError(code: "-1", message: "Set the cursor failed", details: "Did you create this cursor called this name before?"))
+        }
+        break
+    case "deleteCustomCursor":
+        let arguments = call.arguments as! Dictionary<String, Any>
+        let _ = deleteCustomCursor(arguments)
+        result(nil)
+        break
     default:
       result(FlutterMethodNotImplemented)
     }
+  }
+
+  private func createCustomCursor(_ arguments: Dictionary<String, Any>) -> String? {
+    let name = arguments["name"] as! String
+    let buffer = [UInt8]((arguments["buffer"] as! FlutterStandardTypedData).data)
+    let hotX = arguments["hotX"] as! Double
+    let hotY = arguments["hotY"] as! Double
+    // no need to provide width and height on macOS API
+    let _ = arguments["width"] as! Int
+    let _ = arguments["height"] as! Int
+    let image = memoryImage(data: Data(buffer))
+    if (image == nil) {
+        return nil;
+    }
+    let cursor = getCursor(image: image!, x: hotX, y: hotY)
+    caches[name] = cursor;
+    return name
+  }
+    
+  private func setCustomCursor(_ arguments: Dictionary<String,Any>) -> Bool {
+    let name = arguments["name"] as! String
+    let cursor = caches[name];
+    if (cursor == nil) {
+        return false
+    }
+    cursor!.set()
+    return true
+  }
+    
+  private func deleteCustomCursor(_ arguments: Dictionary<String,Any>) -> Bool {
+    let name = arguments["name"] as! String
+    let cursor = caches[name];
+    if (cursor == nil) {
+        return false
+    }
+    caches.removeValue(forKey: name)
+    return true
   }
     
     private func activateMemoryImageCursor(_ arguments: Dictionary<String,Any>) {

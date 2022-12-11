@@ -6,6 +6,7 @@
 #include <sys/utsname.h>
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 #include <iostream>
 #include <cstring>
@@ -20,8 +21,7 @@ struct _FlutterCustomCursorPlugin
 {
   GObject parent_instance;
   FlPluginRegistrar *registrar;
-  vector<pair<string, GdkPixbuf*>> cache;
-  string last_cursor_key = "";
+  unordered_map<string, GdkPixbuf*> cache;
 };
 
 G_DEFINE_TYPE(FlutterCustomCursorPlugin, flutter_custom_cursor_plugin, g_object_get_type())
@@ -46,21 +46,21 @@ GdkWindow *get_gdk_window(FlutterCustomCursorPlugin *self)
 //     'x' : cursor.x,
 //     'y' : cursor.y,
 //   },
-static void activate_cursor(FlutterCustomCursorPlugin *self, FlValue *args)
-{
-  GtkWindow *window = get_window(self);
-  const gchar *cursor_path = fl_value_get_string(fl_value_lookup_string(args, "path"));
-  double x = fl_value_get_float(fl_value_lookup_string(args, "x"));
-  double y = fl_value_get_float(fl_value_lookup_string(args, "y"));
-  // int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
-  GdkDisplay *display = gdk_display_get_default();
-  GtkImage *image = GTK_IMAGE(gtk_image_new_from_file(cursor_path));
-  g_autoptr(GdkPixbuf) pixbuf = gtk_image_get_pixbuf(image);
-  g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_pixbuf(display, pixbuf, x, y);
-  gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+// static void activate_cursor(FlutterCustomCursorPlugin *self, FlValue *args)
+// {
+//   GtkWindow *window = get_window(self);
+//   const gchar *cursor_path = fl_value_get_string(fl_value_lookup_string(args, "path"));
+//   double x = fl_value_get_float(fl_value_lookup_string(args, "x"));
+//   double y = fl_value_get_float(fl_value_lookup_string(args, "y"));
+//   // int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
+//   GdkDisplay *display = gdk_display_get_default();
+//   GtkImage *image = GTK_IMAGE(gtk_image_new_from_file(cursor_path));
+//   g_autoptr(GdkPixbuf) pixbuf = gtk_image_get_pixbuf(image);
+//   g_autoptr(GdkCursor) cursor = gdk_cursor_new_from_pixbuf(display, pixbuf, x, y);
+//   gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
 
-  g_object_ref_sink(image);
-}
+//   g_object_ref_sink(image);
+// }
 
 
 //  <String, dynamic>{
@@ -70,86 +70,59 @@ static void activate_cursor(FlutterCustomCursorPlugin *self, FlValue *args)
 //     'y' : cursor.y,
 //     'length':  cursor.buffer.length
 //   },
-static void activate_memory_image_cursor(FlutterCustomCursorPlugin *self, FlValue *args)
+static string create_custom_cursor(FlutterCustomCursorPlugin *self, FlValue *args)
 {
+  auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
   int length = fl_value_get_int(fl_value_lookup_string(args, "length"));
-  double x = fl_value_get_float(fl_value_lookup_string(args, "x"));
-  double y = fl_value_get_float(fl_value_lookup_string(args, "y"));
-  int sx = fl_value_get_int(fl_value_lookup_string(args, "scale_x"));
-  int sy = fl_value_get_int(fl_value_lookup_string(args, "scale_y"));
+  double hot_x = fl_value_get_float(fl_value_lookup_string(args, "hotX"));
+  double hot_y = fl_value_get_float(fl_value_lookup_string(args, "hotY"));
+  int width = fl_value_get_int(fl_value_lookup_string(args, "width"));
+  int height = fl_value_get_int(fl_value_lookup_string(args, "height"));
   GtkWindow *window = get_window(self);
   GdkPixbuf* pixbuf = nullptr;
 
-  string key = string(fl_value_get_string(fl_value_lookup_string(args, "key")));
-  if (!key.empty())
-  {
-    // look for cache
-    auto it = self->cache.begin();
-    while (it != self->cache.end()) {
-      if ((*it).first == key) {
-        pixbuf = (*it).second;
-        break;
-      }
-      it++;
-    }
+  const uint8_t *cursor_buff = fl_value_get_uint8_list(fl_value_lookup_string(args, "buffer"));
+  if (cursor_buff == nullptr) {
+    return nullptr;
   }
-  if (pixbuf == nullptr)
+  //  int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
+  g_autoptr(GdkPixbufLoader) loader = gdk_pixbuf_loader_new();
+  gdk_pixbuf_loader_write(loader, cursor_buff, length, nullptr);
+  if (width >= 0 && height >= 0)
   {
-    const uint8_t *cursor_buff = fl_value_get_uint8_list(fl_value_lookup_string(args, "buffer"));
-    if (cursor_buff == nullptr) {
-      return;
-    }
-    //  int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
-    g_autoptr(GdkPixbufLoader) loader = gdk_pixbuf_loader_new();
-    gdk_pixbuf_loader_write(loader, cursor_buff, length, nullptr);
-    if (sx >= 0 && sy >= 0)
-    {
-      gdk_pixbuf_loader_set_size(loader, sx, sy);
-    }
-    gdk_pixbuf_loader_close(loader, nullptr);
-    pixbuf = gdk_pixbuf_copy(gdk_pixbuf_loader_get_pixbuf(loader));
-    self->cache.emplace_back(pair<string, GdkPixbuf *>(key, pixbuf));
+    gdk_pixbuf_loader_set_size(loader, width, height);
   }
+  gdk_pixbuf_loader_close(loader, nullptr);
+  pixbuf = gdk_pixbuf_copy(gdk_pixbuf_loader_get_pixbuf(loader));
   GdkDisplay *display = gdk_display_get_default();
   g_autoptr(GdkCursor) cursor;
-  cursor = gdk_cursor_new_from_pixbuf(display, pixbuf, x, y);
-
-  gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
-
-  // add to last cursor key
-  if (!key.empty()) {
-    self->last_cursor_key = move(key);
+  cursor = gdk_cursor_new_from_pixbuf(display, pixbuf, hot_x, hot_y);
+  if (cursor == nullptr) {
+    return nullptr;
   }
+  self->cache[name] = cursor;
+  return name;
 }
 
-static void free_cache(FlutterCustomCursorPlugin* self, FlValue *args) {
-  auto key = string(fl_value_get_string(fl_value_lookup_string(args, "key")));
-  auto it = self->cache.begin();
-  while (it != self->cache.end()) {
-    if ((*it).first == key) {
-      break;
-    }
-    it++;
-  }
-  if (it != self->cache.end()) {
-    if (self->last_cursor_key ==(*it).first) {
-      // clean last cache key
-      self->last_cursor_key.clear();
-    }
-    g_object_unref((*it).second);
-    self->cache.erase(it);
+static bool set_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
+  auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
+  if (self->cache.find(name) != self->cache.end()) {
+    GtkWindow *window = get_window(self);
+    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+    return true;
   } else {
+    return false;
   }
 }
 
-static FlValue* get_cache_list( FlutterCustomCursorPlugin *self) {
-  auto list = fl_value_new_list();
-
-  for(auto& cache : self->cache) {
-    fl_value_append_take(list, fl_value_new_string(cache.first.c_str()));
+static bool delete_custom_cursor(FlutterCustomCursorPlugin* self, FlValue *args) {
+  auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
+  if (self->cache.find(name) != self->cache.end()) {
+    GtkWindow *window = get_window(self);
+    gdk_window_set_cursor(gtk_widget_get_window(GTK_WIDGET(window)), cursor);
+    return true;
   }
-
-  return list;
+  return false;
 }
 
 // Called when a method call is received from Flutter.
@@ -168,36 +141,24 @@ static void flutter_custom_cursor_plugin_handle_method_call(
     g_autoptr(FlValue) result = fl_value_new_string(version);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(result));
   }
-  else if (strcmp(method, "activateCursor") == 0)
+  else if (strcmp(method, "createCustomCursor") == 0)
   {
     auto args = fl_method_call_get_args(method_call);
-    activate_cursor(self, args);
+    auto ret = create_custom_cursor(self, args);
+    response = FL_METHOD_RESPONSE(fl_method_success_response_new(ret));
+  }
+  else if (strcmp(method, "setCustomCursor") == 0)
+  {
+    auto args = fl_method_call_get_args(method_call); 
+    auto _ret = set_custom_cursor(self, args);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
-  else if (strcmp(method, "activateMemoryImageCursor") == 0)
+  else if (strcmp(method, "deleteCustomCursor") == 0)
   {
     auto args = fl_method_call_get_args(method_call);
-    activate_memory_image_cursor(self, args);
+    auto _ret = delete_custom_cursor(self, args);
     response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
   }
-  else if (strcmp(method, "freeCache") == 0)
-  {
-    auto args = fl_method_call_get_args(method_call);
-    free_cache(self, args);
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(nullptr));
-  }
-  else if (strcmp(method, "lastCursorKey") == 0)
-  {
-    g_autofree gchar *last_cursor_key_str = g_strdup_printf("%s", self->last_cursor_key.c_str());
-    auto last_cursor_key = fl_value_new_string(last_cursor_key_str);
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(last_cursor_key));
-  }
-  else if (strcmp(method, "getCacheKeyList") == 0)
-  {
-    auto list = get_cache_list(self);
-    response = FL_METHOD_RESPONSE(fl_method_success_response_new(list));
-  }
-
   fl_method_call_respond(method_call, response, nullptr);
 }
 
