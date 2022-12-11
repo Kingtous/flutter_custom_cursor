@@ -1,6 +1,11 @@
 # flutter_custom_cursor
 
+![](https://img.shields.io/pub/v/flutter_custom_cursor?color=green)
+![](https://img.shields.io/pub/publisher/flutter_custom_cursor)
+
 This plugin allows to create/set a custom mouse cursor directly from a memory buffer.
+
+
 
 Big thanks to imiskolee to create the [base of this plugin](https://github.com/imiskolee/flutter_custom_cursor).
 
