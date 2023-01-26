@@ -17,7 +17,5 @@ void main() {
     channel.setMockMethodCallHandler(null);
   });
 
-  test('registerCursor', () async {
-
-  });
+  test('registerCursor', () async {});
 }
