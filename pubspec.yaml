@@ -1,10 +1,10 @@
 name: flutter_custom_cursor
 description: Create/Set a custom mouse cursor directly from a memory buffer.
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/Kingtous/flutter_custom_cursor
 
 environment:
-  sdk: ">=2.13.0 <3.0.0"
+  sdk: ">=2.15.0 <3.0.0"
   flutter: ">=2.5.0"
 
 dependencies:

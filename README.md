@@ -17,6 +17,8 @@ Big thanks to imiskolee to create the [base of this plugin](https://github.com/i
 
 Note: Currently, the api required by this plugin on Windows is included in flutter `master` branch. It means that u need to use this plugin with flutter master branch on Windows platform. See [flutter engine PR#36143](https://github.com/flutter/engine/pull/36143) for details.
 
+Update: the latest Flutter `3.7.0` does not contain PR above, which merges to `flutter-3.7.0-candidate.2`, while Flutter stable `3.7.0` is using `flutter-3.7.0-candidate.1`. This limitation will be lifted maybe in the next Flutter stable release.
+
 # Get prepared
 
 ## Register your custom cursor before
