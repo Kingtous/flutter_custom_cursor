@@ -76,8 +76,9 @@ static string create_custom_cursor(FlutterCustomCursorPlugin *self, FlValue *arg
   auto name = string(fl_value_get_string(fl_value_lookup_string(args, "name")));
   double hot_x = fl_value_get_float(fl_value_lookup_string(args, "hotX"));
   double hot_y = fl_value_get_float(fl_value_lookup_string(args, "hotY"));
-  int width = fl_value_get_int(fl_value_lookup_string(args, "width"));
-  int height = fl_value_get_int(fl_value_lookup_string(args, "height"));
+  // Ignore [width] and [height].
+  // int width = fl_value_get_int(fl_value_lookup_string(args, "width"));
+  // int height = fl_value_get_int(fl_value_lookup_string(args, "height"));
   GdkPixbuf* pixbuf = nullptr;
   auto buffer = fl_value_lookup_string(args, "buffer");
   const uint8_t *cursor_buff = fl_value_get_uint8_list(buffer);
@@ -88,10 +89,10 @@ static string create_custom_cursor(FlutterCustomCursorPlugin *self, FlValue *arg
   //  int device = fl_value_get_int(fl_value_lookup_string(args, "device"));
   g_autoptr(GdkPixbufLoader) loader = gdk_pixbuf_loader_new();
   gdk_pixbuf_loader_write(loader, cursor_buff, length, nullptr);
-  if (width >= 0 && height >= 0)
-  {
-    gdk_pixbuf_loader_set_size(loader, width, height);
-  }
+  // if (width >= 0 && height >= 0)
+  // {
+  //   gdk_pixbuf_loader_set_size(loader, width, height);
+  // }
   gdk_pixbuf_loader_close(loader, nullptr);
   pixbuf = gdk_pixbuf_copy(gdk_pixbuf_loader_get_pixbuf(loader));
   GdkDisplay *display = gdk_display_get_default();

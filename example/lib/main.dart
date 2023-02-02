@@ -13,10 +13,6 @@ late Uint8List memoryCursorDataRawBGRA;
 late Uint8List memoryCursorDataRawPNG;
 late String cursorName;
 
-String imgPath =
-    "/Users/kingtous/projects/rustdesk_flutter_custom_cursor/example/assets/cursors/data.png";
-String imgRawPath =
-    "/Users/kingtous/projects/rustdesk_flutter_custom_cursor/example/assets/cursors/data.raw";
 late img2.Image img;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
