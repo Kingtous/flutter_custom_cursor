@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -22,7 +21,7 @@ void main() async {
   memoryCursorDataRawPNG = byte.buffer.asUint8List();
   img = await getImage(memoryCursorDataRawPNG);
   memoryCursorDataRawBGRA =
-      (img.getBytes(format: img2.Format.bgra)).buffer.asUint8List();
+      img.getBytes(order: img2.ChannelOrder.bgra);
   // register this cursor
   cursorName = await CursorManager.instance.registerCursor(CursorData()
     ..name = "test"
