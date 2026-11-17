@@ -19,6 +19,21 @@ Note: Currently, the api required by this plugin on Windows is included in flutt
 
 Update: the latest Flutter `3.7.0` does not contain PR above, which merges to `flutter-3.7.0-candidate.2`, while Flutter stable `3.7.0` is using `flutter-3.7.0-candidate.1`. This limitation will be lifted maybe in the next Flutter stable release.
 
+## macOS dependency managers
+
+Requires Flutter 3.41 or later, Dart 3.11 or later, and macOS 10.15 or later.
+The macOS plugin supports both Swift Package Manager and CocoaPods using the
+same Swift sources. Flutter discovers the package automatically; no manual
+Xcode package dependency is needed. Flutter 3.44 and later enable Swift Package
+Manager by default. On Flutter 3.41–3.43, enable it with:
+
+```sh
+flutter config --enable-swift-package-manager
+```
+
+See [macOS validation steps](doc/macos-validation.md) and
+[Flutter's plugin migration guidance](https://docs.flutter.dev/packages-and-plugins/swift-package-manager/for-plugin-authors).
+
 # Get prepared
 
 ## Register your custom cursor before
